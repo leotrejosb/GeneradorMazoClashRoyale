@@ -1,0 +1,11 @@
+# Secretos: nunca subir
+.env
+
+# Datos personales descargados (el archivo de cartas sí se puede subir como respaldo)
+data/raw/player.json
+data/raw/battlelog.json
+
+# Python
+__pycache__/
+*.pyc
+.venv/

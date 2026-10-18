@@ -1,85 +1,148 @@
-# Clash Season Planner
+# Clash Royale Season Planner
 
-Planificador de mazos de Clash Royale para un modo por temporadas donde **no se puede repetir ninguna carta
-de las temporadas anteriores**. A partir del mazo que usé en la temporada 1 (mi estilo de juego), el objetivo
-es proponer los mazos de las temporadas siguientes que se parezcan a ese estilo, repartiendo las cartas de
-forma que ninguna temporada se quede sin piezas clave.
+Builds Clash Royale decks for seasons 2–5 from the deck I played in season 1, **without repeating a single card across seasons** and keeping my play style.
 
-> **Estado del proyecto:** fase 1 (datos). Ya existe el cliente de la API oficial y un script que descarga
-> cartas, perfil y batallas. El perfil de estilo, el armado de mazos y la comparación entre métodos todavía
-> **no están implementados**; abajo está el plan.
+> Demo video: _[Loom link]_
 
-## El problema
+![Deck plan report](docs/plan.png)
 
-En mi modo, cada temporada se juega con un mazo distinto y una carta usada no se puede volver a elegir.
-Hay 5 temporadas (5 mazos, 40 cartas distintas en total). Todas las cartas quedan entre nivel 15 y 16, así
-que el nivel no sirve para decidir: lo que importa es qué **rol** cumple cada carta y cuánto se parece el
-mazo nuevo a mi forma de jugar.
+## The problem
 
-Mi mazo de la temporada 1: Mini P.E.K.K.A, Valquiria, Mosquetera, Montapuercos, Barril de duendes,
-Mago de hielo, Princesa y Ejército de esqueletos.
+I play a personal Clash Royale challenge with five seasons. In season 1 I can pick any 8 cards. From then on, **a card used in any previous season can never be used again**. All cards sit at level 15–16, so card level is not a factor: the only question is *which* cards to pick.
 
-## Herramientas parecidas que ya existen
+That means 40 different cards over five seasons. The hard part is not finding one good deck, it is splitting the good cards across four decks so that the last season is not left with whatever remains.
 
-Hay validadores y constructores manuales que marcan cartas repetidas entre mazos (por ejemplo, el
-Deck Builder de RoyaleAPI y el planificador de guerra de TrophyCoach). Este proyecto no pretende reemplazarlos:
-la idea es **proponer** los mazos automáticamente a partir de un perfil de estilo y **planificar todas las
-temporadas a la vez**.
+My season 1 deck, which defines my style:
 
-## Cómo correrlo
+> Mini P.E.K.K.A, Valkyrie, Musketeer, Hog Rider, Goblin Barrel, Ice Wizard, Princess, Skeleton Army
+> Average elixir 3.5 · every card costs 3 or 4 · fast transitions, no damage spells, no heavy cards
 
-Requiere Python 3.9 o superior. No hay dependencias que instalar.
-
-1. Crea una llave en [developer.clashroyale.com](https://developer.clashroyale.com). El formulario pide una
-   dirección IP permitida: usa la IP pública desde la que vas a ejecutar el script.
-2. Copia `.env.example` como `.env` y completa `CR_API_TOKEN` y `CR_PLAYER_TAG`.
-3. Descarga los datos:
-
-   ```
-   python fetch_data.py
-   ```
-
-   (o `python fetch_data.py --tag "#TUTAG"`). Los archivos quedan en `data/raw/` y el script imprime los
-   campos que trae cada respuesta.
-
-4. Pruebas (no necesitan red ni llave):
-
-   ```
-   python -m unittest
-   ```
-
-## Estructura
+## How it works
 
 ```
-crplanner/client.py   Cliente de la API oficial (cartas, perfil, batallas) y manejo de errores
-fetch_data.py         Script que descarga y guarda las respuestas en data/raw/
-tests/                Pruebas offline del cliente
-data/raw/             Respuestas guardadas; cards.json sirve de respaldo para la demo sin red
+cards.json (official API) ──┐
+roles.csv (hand-labeled) ───┼─> card data ─> deck profile ─> distance to my style
+seasons.json (my deck) ─────┘                                      │
+                                     validity rules ───────────────┤
+                                                                   v
+                              simple method  vs  planned method ─> plan.html
 ```
 
-## Seguridad
+### 1. Data
 
-- La llave vive solo en `.env` (ignorado por git). Nunca se imprime ni se sube.
-- `player.json` y `battlelog.json` están ignorados por defecto porque son datos personales.
+- **Card list** from the [official Clash Royale API](https://developer.clashroyale.com) (`/cards`): 123 cards with elixir cost and image.
+- **Card roles** are not in the API, so I labeled them in `data/roles.csv`: `win_condition`, `tank`, `tank_killer`, `air_defense`, `support`, `swarm`, `building`, `splash`, `spell_big`, `spell_small`, `spell_utility`. A card can have several roles.
+- **Spanish names** in `data/names_es.csv`, used only for display. Internally the program uses the API names.
 
-## Plan
+### 2. Deck profile and style distance
 
-- [x] Cliente de la API oficial con pruebas offline
-- [ ] Revisar las respuestas reales: campos de las cartas, evoluciones/campeones, alcance del registro de batallas
-- [ ] Etiquetar el rol de cada carta (condición de victoria, hechizo, enjambre, etc.)
-- [ ] Perfil de estilo del mazo base (elixir promedio, composición por roles)
-- [ ] Reglas de mazo válido
-- [ ] Método simple: armar una temporada tras otra
-- [ ] Método planificado: armar todas las temporadas a la vez, y compararlo con el simple
-- [ ] Pantalla simple para mostrar los mazos y su parecido al base
+A deck is summarized as:
 
-## Pendientes por confirmar
+- average elixir,
+- how many cards it has of each role,
+- **cost spread** (standard deviation of card costs).
 
-- Si las evoluciones y campeones cuentan como cartas aparte o repiten la carta base en este modo.
-- Qué campos trae realmente `/cards` (en particular, si incluye el tipo de carta) y cuántas batallas guarda el registro.
-- Cómo se vincula la llave a la IP en la página de desarrolladores.
+The distance between two decks is:
 
-## Limitaciones previstas
+```
+|Δ avg elixir| × 1  +  Σ |Δ cards per role|  +  |Δ cost spread| × 2
+```
 
-Los mazos propuestos serán coherentes con mi estilo y las reglas del modo, pero el programa no conoce el
-meta actual ni cómo juego cada carta, así que no garantiza ganar.
+Lower means closer to my style; 0 means the same profile.
+
+### 3. Validity rules
+
+A deck is only considered if it passes every rule (`crplanner/rules.py`). Each rule comes from how I play or from a real game where a generated deck failed:
+
+| Rule | Why |
+|---|---|
+| 8 different cards | Game rule. |
+| Average elixir ≤ 3.8 | I play fast transitions: counter-attack while the opponent is out of elixir. |
+| At least 3 cards costing ≤ 3 | Cheap cards make the deck cycle fast. |
+| No damage spells (Fireball, Arrows, Log…) | I don't play them. |
+| At least one win condition and one air defense | Minimum for a playable deck. |
+| **At least one splash card** | Added after testing: a generated deck had nothing to stop a Skeleton Army or Goblin Gang. My season 1 deck had Valkyrie for that. |
+| **Banned cards** (Golem, Sparky, Three Musketeers, Lava Hound…) | Added after testing: slow or fragile expensive cards that don't fit fast transitions. Expensive but sturdy cards like Mega Knight are still allowed. |
+| At most one card costing ≥ 6 | Two of them leave no room for cheap cards under the 3.8 average. |
+
+### 4. Two ways to build the plan
+
+**Simple method (greedy).** For each season in order, try 20,000 random valid decks from the remaining cards and keep the closest to my style. Then remove its cards and move to the next season.
+Weakness: early seasons take the best cards and the last season gets the leftovers.
+
+**Planned method (local search).** Start from the simple plan and try 100,000 small changes: swap a card with an unused card, or with a card from another season's deck. Undo any change that breaks a rule or makes the total distance worse. Because cards can move *between* seasons, the good cards get shared instead of being used up early.
+
+## Results
+
+One run (`random.seed(7)`, all current rules):
+
+| | Simple | Planned |
+|---|---|---|
+| Total distance (4 decks) | 16.45 | **6.20** |
+| Worst season | 5.03 (season 5) | 3.03 |
+
+The planned method cuts the total distance by 62%. In the simple method the distance grows season by season, which is the leftovers problem it was built to show. Earlier runs with other seeds and earlier versions of the rules showed the same pattern.
+
+### What I learned along the way
+
+- **A metric that is too easy to satisfy is a bug.** The first version only used average elixir and roles, and the planned method reached a distance of 0.00 in all four seasons, mixing 1-elixir and 6-elixir cards to hit the same average. Adding cost spread fixed it.
+- **Testing in the real game found what the numbers missed.** A season 2 deck with Sparky looked fine by the metric but lost to swarms. That game produced the splash and banned-card rules. With the new rules I played noticeably better, though over too few games to call it a measured result.
+
+## How to run
+
+Requires Python 3.10+. `main.py` uses only the standard library.
+
+```bash
+git clone https://github.com/leotrejosb/GeneradorMazoClashRoyale.git
+cd GeneradorMazoClashRoyale
+python main.py
+```
+
+It prints both plans in the terminal and opens `plan.html` in the browser with every deck, card images, elixir, distance and roles.
+
+To use your own season 1 deck, edit `data/seasons.json` with the API card names.
+
+### Refreshing the card list (optional)
+
+`data/raw/cards.json` is already included. To download it again you need a free token from the [Clash Royale developer site](https://developer.clashroyale.com):
+
+1. Copy `.env.example` to `.env` and put your token there. `.env` is git-ignored.
+2. Run `python fetch_data.py`.
+
+## Project structure
+
+```
+crplanner/
+  client.py    API client
+  cards.py     loads cards + roles, builds the deck profile
+  style.py     distance between profiles
+  rules.py     validity rules
+  planner.py   simple and planned methods
+  report.py    HTML report
+data/
+  raw/cards.json   card list from the API
+  roles.csv        hand-labeled roles
+  names_es.csv     Spanish names
+  seasons.json     season 1 deck
+tests/             tests for the rules and the no-repeat constraint
+main.py            runs everything
+fetch_data.py      downloads data from the API
+add_splash.py      one-off script that added the splash role
+```
+
+## Limitations
+
+- **Roles are my labels, not official data.** Some newer cards (Goblinstein, Rune Giant, Boss Bandit…) are labeled with less confidence. The results are only as good as `roles.csv`.
+- **The distance is a design decision.** The weights (1 for elixir, 2 for cost spread) were chosen by testing, not derived. "Close to my style" means "similar numbers", not "plays the same".
+- **It doesn't know the meta or matchups.** It proposes coherent decks for my style; it doesn't promise they win.
+- **Local search can get stuck** in a good but not optimal plan. Running it several times and keeping the best result would help.
+
+## Next steps
+
+- Run many seeds and report averages instead of a single run.
+- Restarts or simulated annealing for the planned method.
+- A per-deck usage guide, left out because I couldn't validate it with data.
+
+## Use of AI
+
+I built this with Claude as a pair: it proposed approaches and explained concepts, and I wrote and tested the core functions (deck profile, distance, rules, planner) and made the design decisions. The rules come from my own games.

@@ -1,0 +1,124 @@
+name,roles,review
+Knight,support,
+Archers,air_defense;support,
+Goblins,swarm,
+Giant,tank;win_condition,
+P.E.K.K.A,tank;tank_killer,
+Minions,air_defense;support,
+Balloon,win_condition,
+Witch,air_defense;support;splash,
+Barbarians,swarm,
+Golem,tank;win_condition,
+Skeletons,swarm,
+Valkyrie,support;splash,
+Skeleton Army,swarm,
+Bomber,support;splash,
+Musketeer,air_defense;support,
+Baby Dragon,air_defense;support;splash,
+Prince,support;tank_killer,?
+Wizard,air_defense;support;splash,
+Mini P.E.K.K.A,support;tank_killer,
+Spear Goblins,air_defense;swarm,
+Giant Skeleton,tank,
+Hog Rider,win_condition,
+Minion Horde,air_defense;swarm,
+Ice Wizard,air_defense;support;splash,
+Royal Giant,tank;win_condition,
+Guards,swarm,
+Princess,air_defense;support;splash,
+Dark Prince,support;splash,
+Three Musketeers,air_defense;win_condition,?
+Lava Hound,tank;win_condition,
+Ice Spirit,support,
+Fire Spirit,support;splash,
+Miner,win_condition,
+Sparky,tank_killer;win_condition;splash,?
+Bowler,support;splash,
+Lumberjack,support,
+Battle Ram,win_condition,
+Inferno Dragon,air_defense;tank_killer;support,
+Ice Golem,tank,
+Mega Minion,air_defense;support,
+Dart Goblin,air_defense;support,
+Goblin Gang,air_defense;swarm,
+Electro Wizard,air_defense;support,
+Elite Barbarians,support,
+Hunter,air_defense;tank_killer;support;splash,
+Executioner,air_defense;support;splash,
+Bandit,support,
+Royal Recruits,swarm,
+Night Witch,support,
+Bats,air_defense;swarm,
+Royal Ghost,support;splash,
+Ram Rider,win_condition,
+Zappies,air_defense;support,?
+Rascals,support;swarm,?
+Cannon Cart,support,?
+Mega Knight,support;tank;splash,
+Skeleton Barrel,swarm;win_condition,?
+Flying Machine,air_defense;support,
+Wall Breakers,win_condition,
+Royal Hogs,win_condition,
+Goblin Giant,tank;win_condition,
+Fisherman,support,?
+Magic Archer,air_defense;support,
+Electro Dragon,air_defense;support;splash,
+Firecracker,air_defense;support;splash,
+Mighty Miner,support,?
+Elixir Golem,tank;win_condition,?
+Battle Healer,support,
+Skeleton King,support;tank;splash,?
+Archer Queen,air_defense;support,?
+Golden Knight,support,?
+Monk,support;tank,?
+Skeleton Dragons,air_defense;swarm;splash,
+Mother Witch,air_defense;support,?
+Electro Spirit,support,
+Electro Giant,tank;win_condition,
+Phoenix,air_defense;support,?
+Little Prince,air_defense;support,?
+Goblin Demolisher,support;splash,?
+Goblin Machine,air_defense;support,?
+Suspicious Bush,support,?
+Goblinstein,support;tank,?
+Rune Giant,tank,?
+Berserker,support,
+Boss Bandit,support,?
+Ronin,support,?
+Minion Giant,support,?
+Cannon,building,
+Goblin Hut,building,
+Mortar,building;win_condition,
+Inferno Tower,building;air_defense;tank_killer,
+Bomb Tower,building;splash,
+Barbarian Hut,building,
+Tesla,building;air_defense,
+Elixir Collector,building,
+X-Bow,building;win_condition,
+Tombstone,building,
+Furnace,building,
+Goblin Cage,building,
+Goblin Drill,building;win_condition,
+Fireball,spell_big,
+Arrows,spell_small,
+Rage,spell_utility,
+Rocket,spell_big,
+Goblin Barrel,win_condition,
+Freeze,spell_utility,
+Mirror,spell_utility,
+Lightning,spell_big,
+Zap,spell_small,
+Poison,spell_big,
+Graveyard,win_condition,
+The Log,spell_small,
+Tornado,spell_utility,
+Clone,spell_utility,
+Earthquake,spell_utility,?
+Barbarian Barrel,spell_small,
+Heal Spirit,support,?
+Giant Snowball,spell_small,
+Royal Delivery,spell_small,?
+Void,spell_big,?
+Goblin Curse,spell_utility,?
+Spirit Empress,support,?
+Vines,spell_utility,?
